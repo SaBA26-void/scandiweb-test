@@ -2,7 +2,16 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
+
+// 
+require __DIR__ . "/../src/Database/Connection.php";
+
+use App\Database\Connection;
+
+$connection = Connection::getInstance();
+
+// 
+$dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) {
     $r->post('/graphql', [App\Controller\GraphQL::class, 'handle']);
 });
 
