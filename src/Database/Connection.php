@@ -6,7 +6,7 @@ use Exception;
 use PDO;
 use PDOException;
 
-final class Connection
+class Connection
 {
     private static ?Connection $instance = null;
     private PDO $connection;
