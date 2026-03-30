@@ -13,10 +13,10 @@ CREATE TABLE IF NOT EXISTS products (
     brand VARCHAR(255),
     is_in_stock TINYINT(1) NOT NULL DEFAULT 0,
     description TEXT,
-    category_id INT UNSIGNED NOT NULL,
+    category_name varchar(255) NOT NULL,
     PRIMARY KEY (product_id),
-    CONSTRAINT fk_products_category FOREIGN KEY (category_id)
-        REFERENCES categories (category_id)
+    CONSTRAINT fk_products_category FOREIGN KEY (category_name)
+        REFERENCES categories (name)
         ON DELETE RESTRICT ON UPDATE CASCADE
 );
 

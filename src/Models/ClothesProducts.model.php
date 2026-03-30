@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Database\Connection;
-use SplStack;
 
 class ClothesProducts
 {
@@ -12,7 +11,7 @@ class ClothesProducts
     private string $brand;
     private bool $isInStock;
     private string $decription;
-    private int $categoryId;
+    private string $categoryName;
     private Connection $db;
     private array $productImages  = [];
     private array $attributes = [];
@@ -26,7 +25,7 @@ class ClothesProducts
         $this->brand = $data['brand'] ?? '';
         $this->isInStock = $data['is_in_stock'] ?? false;
         $this->decription = $data['description'] ?? '';
-        $this->categoryId = $data['category_id'] ?? 0;
+        $this->categoryName = $data['category_name'] ?? 0;
         $this->productImages = $data['product_images'] ?? [];
         $this->attributes = $data['product_attribute_values'] ?? [];
         $this->price = $data['prices'] ?? [];
@@ -52,9 +51,9 @@ class ClothesProducts
         return $this->decription;
     }
 
-    public function getCategory(): int
+    public function getCategory(): string
     {
-        return $this->categoryId;
+        return $this->categoryName;
     }
 
     public function getBrand(): string
@@ -79,7 +78,7 @@ class ClothesProducts
             'name' => $this->name,
             'is_in_stock' => $this->isInStock,
             'decription' => $this->decription,
-            'categroy_id' => $this->categoryId,
+            'categroy_name' => $this->categoryName,
             'brand' => $this->brand,
             'product_images' => array_map(
                 static fn(array $img) => $img['product_image_url'],
@@ -106,5 +105,41 @@ class ClothesProducts
                 $this->attributes
             )
         ];
+    }
+
+    public static function findAll(?string $categoryName = null): array
+    {
+        $instance = new self();
+
+        if ($categoryName !== null && $categoryName !== 'all') {
+            $rows = $instance->db->query(
+                'SELECT * FROM products WHERE category_name = :string',
+                [$categoryName]
+            );
+        }
+
+        $rows = $instance->db->query('SELECT * FROM products');
+
+        // temporary fix
+        return [];
+        //I need to join the data in order to return the complete
+        // information
+        // 
+    }
+
+    public static function findById(string  $id): ?self
+    {
+        $instance = new self();
+        $rows = $instance->db->query(
+            'SELECT * FROM products where id = :string ',
+            [$id]
+        );
+
+        if (empty($rows)) return null;
+        // temporary error fix
+        return null;
+        //I need to join the data in order to return the
+        // complete information here too
+        // 
     }
 }
