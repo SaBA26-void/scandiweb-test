@@ -24,7 +24,7 @@ class Connection
             echo "connection works";
         } catch (PDOException $e) {
             error_log('Database Conncetion error' . $e->getMessage());
-            throw new Exception("Dtabase connection failed!");
+            throw new Exception("Database connection failed!", 0, $e);
         }
     }
 

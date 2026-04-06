@@ -6,15 +6,11 @@ use App\Database\Connection;
 
 class Category
 {
-    protected Connection $db;
-    private int $id;
-    private string $name;
+    private readonly Connection $db;
 
-    public function __construct(array $data = [])
+    public function __construct(private ?int $id = null, private ?string $name = null)
     {
         $this->db = Connection::getInstance();
-        $this->id = (int) ($data['id'] ?? 0);
-        $this->name = $data['name'] ?? '';
     }
 
     public function getID(): int
@@ -41,15 +37,15 @@ class Category
         $rows = $instance->db->query('SELECT id, name FROM categories ORDER BY id');
 
         return array_map(
-            static fn(array $row)  => new self($row),
-            $rows
+            static fn(array $row)  => new self($row['id'], $row['title']),
+            $rows,
         );
     }
 
     public static function findByName(string $name): ?self
     {
         $instance = new self();
-        $rows = $instance->db->query('SELECT * FROM categories WHERE name = :sstring', [$name]);
+        $rows = $instance->db->query('SELECT * FROM categories WHERE name = :name', [':name' => $name]);
 
         return !empty($rows) ? new self($rows[0]) : null;
     }

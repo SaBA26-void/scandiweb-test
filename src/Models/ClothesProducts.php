@@ -6,26 +6,26 @@ use App\Database\Connection;
 
 class ClothesProducts
 {
-    private string $id;
-    private string $name;
-    private string $brand;
-    private bool $isInStock;
-    private string $decription;
-    private string $categoryName;
-    private Connection $db;
-    private array $productImages  = [];
-    private array $attributes = [];
-    private array $price = [];
+    private readonly Connection $db;
 
-    public function __construct(array $data = [])
-    {
+    public function __construct(
+        private ?string $id = null,
+        private ?string $name = null,
+        private ?string $brand = null,
+        private ?bool $isInStock = null,
+        private ?string $decription = null,
+        private ?string $categoryName = null,
+        private ?array $productImages = null,
+        private ?array $attributes = null,
+        private ?array $price = null,
+    ) {
         $this->db = Connection::getInstance();
         $this->id = $data['product_id'] ?? '';
         $this->name = $data['name'] ?? '';
         $this->brand = $data['brand'] ?? '';
         $this->isInStock = $data['is_in_stock'] ?? false;
         $this->decription = $data['description'] ?? '';
-        $this->categoryName = $data['category_name'] ?? 0;
+        $this->categoryName = $data['category_name'] ?? '';
         $this->productImages = $data['product_images'] ?? [];
         $this->attributes = $data['product_attribute_values'] ?? [];
         $this->price = $data['prices'] ?? [];
@@ -77,8 +77,8 @@ class ClothesProducts
             'id' => $this->id,
             'name' => $this->name,
             'is_in_stock' => $this->isInStock,
-            'decription' => $this->decription,
-            'categroy_name' => $this->categoryName,
+            'description' => $this->decription,
+            'category_name' => $this->categoryName,
             'brand' => $this->brand,
             'product_images' => array_map(
                 static fn(array $img) => $img['product_image_url'],
@@ -113,12 +113,13 @@ class ClothesProducts
 
         if ($categoryName !== null && $categoryName !== 'all') {
             $rows = $instance->db->query(
-                'SELECT * FROM products WHERE category_name = :string',
-                [$categoryName]
+                'SELECT * FROM products WHERE category_name = :categroy_name',
+                ['categroy_name' => $categoryName]
             );
+        } else {
+            $rows = $instance->db->query('SELECT * FROM products');
         }
 
-        $rows = $instance->db->query('SELECT * FROM products');
 
         // temporary fix
         return [];
@@ -131,8 +132,8 @@ class ClothesProducts
     {
         $instance = new self();
         $rows = $instance->db->query(
-            'SELECT * FROM products where id = :string ',
-            [$id]
+            'SELECT * FROM products where id = :id ',
+            ['id' => $id]
         );
 
         if (empty($rows)) return null;
