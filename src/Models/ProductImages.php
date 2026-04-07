@@ -37,7 +37,7 @@ class ProductImages extends AbstractModel
 
         if (!empty($productId)) {
             $rows = $instance->db->query(
-                'SELECT product_image_id, product_image_url FROM product_images WHERE product_id = :product_id',
+                'SELECT product_id, product_image_id, product_image_url FROM product_images WHERE product_id = :product_id',
                 ['product_id' => $productId]
             );
 
