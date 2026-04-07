@@ -9,7 +9,7 @@ class ProductImages
     private int $producImageId;
     private string $productId;
     private string $productImageUrl;
-    private Connection $db;
+    private readonly Connection $db;
 
     public function __construct(array $data = [])
     {

@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Database\Connection;
 
-class ClothesProducts
+abstract class AbstractProduct
 {
     private readonly Connection $db;
 
