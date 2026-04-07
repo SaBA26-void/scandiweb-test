@@ -2,19 +2,16 @@
 
 namespace App\Models;
 
-use PDO;
-use App\Database\Connection;
+use App\Models\AbstractModel;
 
-class Currencies
+class Currencies extends AbstractModel
 {
     private int $currencyId;
     private string $label;
     private string $symbole;
-    private readonly Connection $db;
 
     public function __construct(array $data = [])
     {
-        $this->db = Connection::getInstance();
         $this->currencyId = $data['currency_id'] ?? 0;
         $this->label = $data['label'] ?? '';
         $this->symbole = $data['sybol'] ?? '';

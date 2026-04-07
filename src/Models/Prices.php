@@ -2,20 +2,18 @@
 
 namespace App\Models;
 
-use PDO;
-use App\Database\Connection;
 
-class Prices
+use App\Models\AbstractModel;
+
+class Prices extends AbstractModel
 {
     private int $priceId;
     private string $productId;
     private int $currencyId;
     private float $amount;
-    private readonly Connection $db;
 
     public function __construct(array $data = [])
     {
-        $this->db = Connection::getInstance();
         $this->priceId = $data['price_id'] ?? 0;
         $this->productId = $data['product_id'] ?? '';
         $this->currencyId = $data['currency_id'] ?? 0;

@@ -2,18 +2,16 @@
 
 namespace App\Models;
 
-use App\Database\Connection;
+use App\Models\AbstractModel;
 
-class ProductImages
+class ProductImages extends AbstractModel
 {
     private int $producImageId;
     private string $productId;
     private string $productImageUrl;
-    private readonly Connection $db;
 
     public function __construct(array $data = [])
     {
-        $this->db = Connection::getInstance();
         $this->producImageId = (int) ($data['product_image_id'] ?? 0);
         $this->productId = $data['product_id'] ?? '';
         $this->productImageUrl = $data['product_image_url'] ?? '';
