@@ -2,16 +2,11 @@
 
 namespace App\Models;
 
-use App\Database\Connection;
 
-class Category
+class Category extends AbstractModel
 {
-    private readonly Connection $db;
 
-    public function __construct(private ?int $id = null, private ?string $name = null)
-    {
-        $this->db = Connection::getInstance();
-    }
+    public function __construct(private ?int $id = null, private ?string $name = null) {}
 
     public function getID(): int
     {

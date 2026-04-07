@@ -2,12 +2,10 @@
 
 namespace App\Models;
 
-use App\Database\Connection;
+use App\Models\AbstractModel;
 
-abstract class AbstractProduct
+abstract class AbstractProduct extends AbstractModel
 {
-    private readonly Connection $db;
-
     public function __construct(
         private ?string $id = null,
         private ?string $name = null,
@@ -19,7 +17,6 @@ abstract class AbstractProduct
         private ?array $attributes = null,
         private ?array $price = null,
     ) {
-        $this->db = Connection::getInstance();
         $this->id = $data['product_id'] ?? '';
         $this->name = $data['name'] ?? '';
         $this->brand = $data['brand'] ?? '';
