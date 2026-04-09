@@ -48,11 +48,14 @@ class Currencies extends AbstractModel
         $rows = $instance->db->query(
             "SELECT currency_id, label, symbol FROM currencies ORDER BY currency_id"
         );
-        // temp fix
-        return [];
+
+        return array_map(
+            static fn(array $row) => new self($row['currency_id'], $row['label'], $row['symbol']),
+            $rows
+        );
     }
 
-    public static function getCurrencieByLabel(?string $label = null): array
+    public static function getCurrencieByLabel(?string $label = null): ?array
     {
         $instance = new self();
 
@@ -60,7 +63,10 @@ class Currencies extends AbstractModel
             "SELECT currency_id, label, symbol FROM currencies where label = :label",
             ['label' => $label]
         );
-        // temp fix
-        return [];
+
+        return !empty($rows) ?  array_map(
+            static fn(array $row) => new self($row['lablel'], $row['currency_id'], $row['symbol']),
+            $rows
+        ) : null;
     }
 }
