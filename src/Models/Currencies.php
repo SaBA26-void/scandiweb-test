@@ -55,7 +55,7 @@ class Currencies extends AbstractModel
         );
     }
 
-    public static function getCurrencieByLabel(?string $label = null): ?array
+    public static function getCurrencieByLabel(?string $label = null): array
     {
         $instance = new self();
 
@@ -67,6 +67,6 @@ class Currencies extends AbstractModel
         return !empty($rows) ?  array_map(
             static fn(array $row) => new self($row['lablel'], $row['currency_id'], $row['symbol']),
             $rows
-        ) : null;
+        ) : [];
     }
 }

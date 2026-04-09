@@ -50,7 +50,7 @@ class Prices extends AbstractModel
         ];
     }
 
-    public static function getPricesByProduct(?string $productId = null): ?array
+    public static function getPricesByProduct(?string $productId = null): array
     {
         $instance = new self();
 
@@ -64,14 +64,14 @@ class Prices extends AbstractModel
         return !empty($rows) ? array_map(
             static fn(array $row) => new self($row['price_id'], $row['product_id'], $row['currnecy_id'], $row['amount']),
             $rows
-        ) : null;
+        ) : [];
     }
 
-    public static function findPrice(string $productId, int $currencyId): ?Prices
+    public static function findPrice(string $productId, int $currencyId): array
     {
         $instance = new self();
 
-        $stmt = $instance->db->query(
+        $rows = $instance->db->query(
             "SELECT price_id, product_id, currency_id, amount 
              FROM prices 
              WHERE product_id = :product_id AND currency_id = :currency_id",
@@ -81,7 +81,9 @@ class Prices extends AbstractModel
             ]
         );
 
-        // temp fix
-        return null;
+        return !empty($rows) ? array_map(
+            static fn(array $row) => new self($row['price_id'], $row['product_id'], $row['currency_id'], $row['amount']),
+            $rows
+        ) : [];
     }
 }
