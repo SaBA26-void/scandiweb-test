@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Models;
+namespace App\Models\Attributes;
 
 use App\Models\AbstractModel;
 

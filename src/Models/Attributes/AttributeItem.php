@@ -13,6 +13,8 @@ class AttributeItem extends AbstractModel
 
     public function __construct(array $data = [])
     {
+        parent::__construct();
+
         $this->attributeItemId = (string) ($data['attribute_item_id'] ?? '');
         $this->attributeSetId = (int) ($data['attribute_set_id'] ?? 0);
         $this->value = (string) ($data['value'] ?? '');
@@ -49,15 +51,35 @@ class AttributeItem extends AbstractModel
         ];
     }
 
+
     public static function getItems(): array
     {
         $instance = new self();
         $rows = $instance->db->query(
-            "SELECT attribute_item_id, attribute_set_id, value, display_value FROM attribute_items ORDER BY attribute_item_id"
+            'SELECT attribute_item_id, attribute_set_id, value, display_value
+             FROM attribute_items
+             ORDER BY attribute_set_id, attribute_item_id'
         );
 
         return array_map(
-            static fn(array $row) => new self($row["attribute_item_id"], $row["attribute_set_id"], $row['value'], $row["display_value"]),
+            static fn(array $row) => new self($row),
+            $rows
+        );
+    }
+
+    public static function findByAttributeSetId(int $attributeSetId): array
+    {
+        $instance = new self();
+        $rows = $instance->db->query(
+            'SELECT attribute_item_id, attribute_set_id, value, display_value
+             FROM attribute_items
+             WHERE attribute_set_id = :attribute_set_id
+             ORDER BY attribute_item_id',
+            ['attribute_set_id' => $attributeSetId]
+        );
+
+        return array_map(
+            static fn(array $row) => new self($row),
             $rows
         );
     }
