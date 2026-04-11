@@ -3,9 +3,11 @@
 
 namespace App\Models\Attributes;
 
+
 use App\Models\AbstractModel;
 
-class ProductAttributeValues extends AbstractModel
+
+class ProductAttributeValue extends AbstractModel
 {
     private int $pavId;
     private string $productId;
@@ -52,6 +54,7 @@ class ProductAttributeValues extends AbstractModel
         ];
     }
 
+
     public static function findByProductId(string $productId): array
     {
         $instance = new self();
@@ -64,8 +67,9 @@ class ProductAttributeValues extends AbstractModel
             ['product_id' => $productId]
         );
 
-        // temp fix
-
-        return [];
+        return array_map(
+            static fn(array $row) => new self($row),
+            $rows
+        );
     }
 }

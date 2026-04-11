@@ -1,12 +1,16 @@
 <?php
 
+
 namespace App\Models;
+
 
 
 class Category extends AbstractModel
 {
-
-    public function __construct(private ?int $id = null, private ?string $name = null) {}
+    public function __construct(private int $id = 0, private string $name = '')
+    {
+        parent::__construct();
+    }
 
     public function getID(): int
     {
@@ -26,22 +30,32 @@ class Category extends AbstractModel
         ];
     }
 
+
     public static function findAll(): array
     {
         $instance = new self();
-        $rows = $instance->db->query('SELECT id, name FROM categories ORDER BY id');
+        $rows = $instance->db->query(
+            'SELECT category_id, name FROM categories ORDER BY category_id'
+        );
 
         return array_map(
-            static fn(array $row)  => new self($row['id'], $row['title']),
-            $rows,
+            static fn(array $row) => new self((int) $row['category_id'], (string) $row['name']),
+            $rows
         );
     }
 
     public static function findByName(string $name): ?self
     {
         $instance = new self();
-        $rows = $instance->db->query('SELECT * FROM categories WHERE name = :name', [':name' => $name]);
+        $rows = $instance->db->query(
+            'SELECT category_id, name FROM categories WHERE name = :name LIMIT 1',
+            ['name' => $name]
+        );
 
-        return !empty($rows) ? new self($rows[0]) : null;
+        if ($rows === []) {
+            return null;
+        }
+
+        return new self((int) $rows[0]['category_id'], (string) $rows[0]['name']);
     }
 }

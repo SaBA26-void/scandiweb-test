@@ -1,31 +1,37 @@
 <?php
 
+
 namespace App\Models\Products;
+
 
 use App\Models\AbstractModel;
 
+
 abstract class AbstractProduct extends AbstractModel
 {
-    public function __construct(
-        private ?string $id = null,
-        private ?string $name = null,
-        private ?string $brand = null,
-        private ?bool $isInStock = null,
-        private ?string $decription = null,
-        private ?string $categoryName = null,
-        private ?array $productImages = null,
-        private ?array $attributes = null,
-        private ?array $price = null,
-    ) {
-        $this->id = $data['product_id'] ?? '';
-        $this->name = $data['name'] ?? '';
-        $this->brand = $data['brand'] ?? '';
-        $this->isInStock = $data['is_in_stock'] ?? false;
-        $this->decription = $data['description'] ?? '';
-        $this->categoryName = $data['category_name'] ?? '';
+    protected string $id;
+    protected string $name;
+    protected string $brand;
+    protected bool $isInStock;
+    protected string $description;
+    protected string $categoryName;
+    protected array $productImages;
+    protected array $attributes;
+    protected array $prices;
+
+    public function __construct(array $data = [])
+    {
+        parent::__construct();
+
+        $this->id = (string) ($data['product_id'] ?? '');
+        $this->name = (string) ($data['name'] ?? '');
+        $this->brand = (string) ($data['brand'] ?? '');
+        $this->isInStock = !empty($data['is_in_stock']);
+        $this->description = (string) ($data['description'] ?? '');
+        $this->categoryName = (string) ($data['category_name'] ?? '');
         $this->productImages = $data['product_images'] ?? [];
         $this->attributes = $data['product_attribute_values'] ?? [];
-        $this->price = $data['prices'] ?? [];
+        $this->prices = $data['prices'] ?? [];
     }
 
     public function getProductId(): string
@@ -45,7 +51,7 @@ abstract class AbstractProduct extends AbstractModel
 
     public function getDescription(): string
     {
-        return $this->decription;
+        return $this->description;
     }
 
     public function getCategory(): string
@@ -65,8 +71,9 @@ abstract class AbstractProduct extends AbstractModel
 
     public function getPrice(): array
     {
-        return $this->price;
+        return $this->prices;
     }
+
 
     public function toArray(): array
     {
@@ -74,7 +81,7 @@ abstract class AbstractProduct extends AbstractModel
             'id' => $this->id,
             'name' => $this->name,
             'is_in_stock' => $this->isInStock,
-            'description' => $this->decription,
+            'description' => $this->description,
             'category_name' => $this->categoryName,
             'brand' => $this->brand,
             'product_images' => array_map(
@@ -89,7 +96,7 @@ abstract class AbstractProduct extends AbstractModel
                         'symbol' => $p['currency_symbol'],
                     ],
                 ],
-                $this->price
+                $this->prices
             ),
             'attributes' => array_map(
                 static fn(array $a) => [
@@ -100,44 +107,7 @@ abstract class AbstractProduct extends AbstractModel
                     'display_value' => $a['display_value'],
                 ],
                 $this->attributes
-            )
+            ),
         ];
-    }
-
-    public static function findAll(?string $categoryName = null): array
-    {
-        $instance = new self();
-
-        if ($categoryName !== null && $categoryName !== 'all') {
-            $rows = $instance->db->query(
-                'SELECT * FROM products WHERE category_name = :categroy_name',
-                ['categroy_name' => $categoryName]
-            );
-        } else {
-            $rows = $instance->db->query('SELECT * FROM products');
-        }
-
-
-        // temporary fix
-        return [];
-        //I need to join the data in order to return the complete
-        // information
-        // 
-    }
-
-    public static function findById(string  $id): ?self
-    {
-        $instance = new self();
-        $rows = $instance->db->query(
-            'SELECT * FROM products where id = :id ',
-            ['id' => $id]
-        );
-
-        if (empty($rows)) return null;
-        // temporary error fix
-        return null;
-        //I need to join the data in order to return the
-        // complete information here too
-        // 
     }
 }
