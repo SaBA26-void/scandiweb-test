@@ -1,39 +1,85 @@
 <?php
 
-
 namespace App\Models\Products;
 
+use App\Models\AbstractModel;
 
-class Product extends AbstractProduct
+class Product extends AbstractModel
 {
+    private string $id;
+    private string $name;
+    private string $brand;
+    private bool $inStock;
+    private string $description;
+    private string $category;
 
+    public function __construct(array $data = [])
+    {
+        parent::__construct();
 
-    public static function findAll(?string $categoryName = null): array
+        $this->id = (string)($data['product_id'] ?? '');
+        $this->name = (string)($data['name'] ?? '');
+        $this->brand = (string)($data['brand'] ?? '');
+        $this->inStock = (bool)($data['is_in_stock'] ?? false);
+        $this->description = (string)($data['description'] ?? '');
+        $this->category = (string)($data['category_name'] ?? '');
+    }
+
+    public function getId(): string
+    {
+        return $this->id;
+    }
+    public function getName(): string
+    {
+        return $this->name;
+    }
+    public function getBrand(): string
+    {
+        return $this->brand;
+    }
+    public function isInStock(): bool
+    {
+        return $this->inStock;
+    }
+    public function getDescription(): string
+    {
+        return $this->description;
+    }
+    public function getCategoryName(): string
+    {
+        return $this->category;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'brand' => $this->brand,
+            'inStock' => $this->inStock,
+            'description' => $this->description,
+            'category' => $this->category,
+        ];
+    }
+
+    public static function findAll(?string $category = null): array
     {
         $instance = new self();
 
-        if ($categoryName !== null && $categoryName !== 'all') {
-            $rows = $instance->db->query(
-                'SELECT product_id, name, brand, is_in_stock, description, category_name
-                 FROM products
-                 WHERE category_name = :category_name
-                 ORDER BY name',
-                ['category_name' => $categoryName]
-            );
-        } else {
-            $rows = $instance->db->query(
-                'SELECT product_id, name, brand, is_in_stock, description, category_name
-                 FROM products
-                 ORDER BY name'
-            );
+        $sql = 'SELECT product_id, name, brand, is_in_stock, description, category_name FROM products';
+        $params = [];
+
+        if ($category !== null && $category !== '' && $category !== 'all') {
+            $sql .= ' WHERE category_name = :category_name';
+            $params['category_name'] = $category;
         }
 
-        return array_map(
-            static fn(array $row) => self::fromProductRow($row),
-            $rows
-        );
-    }
+        $sql .= ' ORDER BY name';
 
+        $rows = $instance->db->query($sql, $params);
+
+        return array_map(static fn(array $row) => new self($row), $rows);
+    }
 
     public static function findById(string $id): ?self
     {
@@ -46,56 +92,6 @@ class Product extends AbstractProduct
             ['id' => $id]
         );
 
-        if ($rows === []) {
-            return null;
-        }
-
-        return self::fromProductRow($rows[0]);
-    }
-
-
-    private static function fromProductRow(array $productRow): self
-    {
-        $instance = new self();
-        $productId = (string) $productRow['product_id'];
-
-        $images = $instance->db->query(
-            'SELECT product_image_id, product_id, product_image_url
-             FROM product_images
-             WHERE product_id = :product_id
-             ORDER BY product_image_id',
-            ['product_id' => $productId]
-        );
-
-        $prices = $instance->db->query(
-            'SELECT p.amount, c.label AS currency_label, c.symbol AS currency_symbol
-             FROM prices p
-             INNER JOIN currencies c ON c.currency_id = p.currency_id
-             WHERE p.product_id = :product_id',
-            ['product_id' => $productId]
-        );
-
-
-        $attributesSql = "SELECT ast.name AS attribute_set, ast.type 
-                        AS attribute_type,
-                        ai.attribute_item_id, ai.value, ai.display_value
-                        FROM product_attribute_values pav
-            INNER JOIN attribute_sets ast ON ast.attribute_set_id = pav.attribute_set_id
-            INNER JOIN attribute_items ai ON ai.attribute_item_id = pav.attribute_item_id
-            WHERE pav.product_id = :product_id
-            ORDER BY ast.attribute_set_id, ai.attribute_item_id";
-        $attributes = $instance->db->query($attributesSql, ['product_id' => $productId]);
-
-        return new self([
-            'product_id' => $productId,
-            'name' => $productRow['name'] ?? '',
-            'brand' => $productRow['brand'] ?? '',
-            'is_in_stock' => (int) ($productRow['is_in_stock'] ?? 0),
-            'description' => $productRow['description'] ?? '',
-            'category_name' => $productRow['category_name'] ?? '',
-            'product_images' => $images,
-            'prices' => $prices,
-            'product_attribute_values' => $attributes
-        ]);
+        return $rows ? new self($rows[0]) : null;
     }
 }

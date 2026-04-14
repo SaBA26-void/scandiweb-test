@@ -69,4 +69,20 @@ class ProductImage extends AbstractModel
             $rows
         );
     }
+
+    public static function findByImageId(int $productImageId): array
+    {
+        $instance = new self();
+        $rows = $instance->db->query(
+            'SELECT product_image_id, product_id, product_image_url
+             FROM product_images
+             WHERE product_image_id = :product_image_id',
+            ['product_image_id' => $productImageId]
+        );
+
+        return array_map(
+            static fn(array $row) => new self($row),
+            $rows
+        );
+    }
 }
