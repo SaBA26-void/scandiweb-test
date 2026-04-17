@@ -21,7 +21,6 @@ class Connection
         try {
             $this->connection = new PDO($dsn, $user, $password);
             $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            echo "connection works";
         } catch (PDOException $e) {
             error_log('Database Conncetion error' . $e->getMessage());
             throw new Exception("Database connection failed!", 0, $e);
