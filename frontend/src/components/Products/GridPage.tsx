@@ -7,7 +7,6 @@ type GridPageProps = {
   errorMessage: string;
   products: ProductDetailsData[];
   onAddToCart: (product: ProductDetailsData) => void | Promise<void>;
-  onOpenProduct: (productId: string) => void;
 };
 
 const GridPage = ({
@@ -16,7 +15,6 @@ const GridPage = ({
   errorMessage,
   products,
   onAddToCart,
-  onOpenProduct,
 }: GridPageProps) => {
   const heading = categoryName.charAt(0).toUpperCase() + categoryName.slice(1);
 
@@ -38,7 +36,6 @@ const GridPage = ({
             key={product.id}
             product={product}
             onAddToCart={onAddToCart}
-            onOpenProduct={onOpenProduct}
           />
         ))}
       </section>

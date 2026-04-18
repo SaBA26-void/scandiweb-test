@@ -1,10 +1,10 @@
 import cartIcon from "../../assets/icons/white-Cart-Icon-Empty.svg";
 import type { ProductDetailsData } from "../../data/products";
+import { useLocation, useNavigate } from "react-router";
 
 type GridItemProps = {
   product: ProductDetailsData;
   onAddToCart: (product: ProductDetailsData) => void;
-  onOpenProduct: (productId: string) => void;
 };
 
 function toKebabCase(value: string): string {
@@ -15,7 +15,10 @@ function toKebabCase(value: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
-const GridItem = ({ product, onAddToCart, onOpenProduct }: GridItemProps) => {
+const GridItem = ({ product, onAddToCart }: GridItemProps) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   return (
     <article
       data-testid={`product-${toKebabCase(product.name)}`}
@@ -39,7 +42,11 @@ const GridItem = ({ product, onAddToCart, onOpenProduct }: GridItemProps) => {
       {/* image */}
       <button
         type="button"
-        onClick={() => onOpenProduct(product.id)}
+        onClick={() =>
+          navigate(`/product/${encodeURIComponent(product.id)}`, {
+            state: { from: location.pathname },
+          })
+        }
         className="pt-[16px] px-[16px] pb-[24px] text-left"
       >
         <img
@@ -58,7 +65,11 @@ const GridItem = ({ product, onAddToCart, onOpenProduct }: GridItemProps) => {
       <div className="flex flex-col items-start px-[16px] pb-[16px] gap-[5px]">
         <button
           type="button"
-          onClick={() => onOpenProduct(product.id)}
+          onClick={() =>
+            navigate(`/product/${encodeURIComponent(product.id)}`, {
+              state: { from: location.pathname },
+            })
+          }
           className="font-raleway font-light text-[18px] leading-[160%] text-[#1D1F22]"
         >
           {product.name}

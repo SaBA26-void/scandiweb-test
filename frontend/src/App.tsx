@@ -1,5 +1,13 @@
 import "./App.css";
 import { useEffect, useMemo, useState } from "react";
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from "react-router";
 import Navbar from "./components/layout/Navbar";
 import GridPage from "./components/Products/GridPage";
 import CartOverlay from "./components/cart/CartOverlay";
@@ -23,18 +31,45 @@ const buildLineKey = (productId: string, selections: CartSelections) => {
   return `${productId}|${selectionPart}`;
 };
 
-function App() {
+const encodeCategoryPath = (category: string) => `/${encodeURIComponent(category)}`;
+const safeDecode = (value: string) => {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+};
+const getCategoryFromPath = (pathname: string) => {
+  const match = pathname.match(/^\/([^/]+)$/);
+  if (!match) return "";
+  return safeDecode(match[1]);
+};
+const getProductIdFromPath = (pathname: string) => {
+  const match = pathname.match(/^\/product\/(.+)$/);
+  if (!match) return null;
+  return safeDecode(match[1]);
+};
+
+type ProductLocationState = {
+  from?: string;
+};
+
+function RoutedApp() {
   const [categories, setCategories] = useState<string[]>([]);
-  const [activeCategory, setActiveCategory] = useState("all");
   const [products, setProducts] = useState<ProductDetailsData[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   const [loadError, setLoadError] = useState("");
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [activeProductId, setActiveProductId] = useState<string | null>(null);
-  const [detailProduct, setDetailProduct] = useState<ProductDetailsData | null>(null);
+  const [detailProduct, setDetailProduct] = useState<ProductDetailsData | null>(
+    null,
+  );
   const [pdpLoading, setPdpLoading] = useState(false);
   const [lines, setLines] = useState<CartLine[]>([]);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const activeCategory = getCategoryFromPath(location.pathname);
+  const activeProductId = getProductIdFromPath(location.pathname);
   const listProduct = activeProductId ? getProductById(products, activeProductId) : null;
 
   useEffect(() => {
@@ -72,7 +107,6 @@ function App() {
         const nextCategories = await fetchCategories();
         if (nextCategories.length > 0) {
           setCategories(nextCategories);
-          setActiveCategory(nextCategories[0]);
         }
       } catch {
         setLoadError("Could not load categories.");
@@ -84,6 +118,10 @@ function App() {
 
   useEffect(() => {
     if (!activeCategory) return;
+    if (categories.length > 0 && !categories.includes(activeCategory)) {
+      navigate(encodeCategoryPath(categories[0]), { replace: true });
+      return;
+    }
 
     const loadProducts = async () => {
       setIsLoadingProducts(true);
@@ -100,20 +138,23 @@ function App() {
     };
 
     loadProducts();
-  }, [activeCategory]);
+  }, [activeCategory, categories, navigate]);
 
   const cartItemCount = useMemo(
     () => lines.reduce((sum, line) => sum + line.quantity, 0),
-    [lines]
+    [lines],
   );
 
-  const addProduct = (product: ProductDetailsData, selections: CartSelections) => {
+  const addProduct = (
+    product: ProductDetailsData,
+    selections: CartSelections,
+  ) => {
     if (!product.inStock) return;
 
     setLines((prev) => {
       const key = buildLineKey(product.id, selections);
       const existingIndex = prev.findIndex(
-        (line) => buildLineKey(line.product.id, line.selections) === key
+        (line) => buildLineKey(line.product.id, line.selections) === key,
       );
 
       if (existingIndex >= 0) {
@@ -137,7 +178,9 @@ function App() {
     });
   };
 
-  const getDefaultSelections = (product: ProductDetailsData): CartSelections => {
+  const getDefaultSelections = (
+    product: ProductDetailsData,
+  ): CartSelections => {
     const defaults: CartSelections = {};
 
     product.attributes.forEach((attribute) => {
@@ -153,8 +196,10 @@ function App() {
   const increaseLine = (lineId: string) => {
     setLines((prev) =>
       prev.map((line) =>
-        line.lineId === lineId ? { ...line, quantity: line.quantity + 1 } : line
-      )
+        line.lineId === lineId
+          ? { ...line, quantity: line.quantity + 1 }
+          : line,
+      ),
     );
   };
 
@@ -164,9 +209,13 @@ function App() {
         if (line.lineId !== lineId) return [line];
         if (line.quantity === 1) return [];
         return [{ ...line, quantity: line.quantity - 1 }];
-      })
+      }),
     );
   };
+
+  const from =
+    (location.state as ProductLocationState | null)?.from ??
+    (categories[0] ? encodeCategoryPath(categories[0]) : "/");
 
   return (
     <div>
@@ -174,52 +223,88 @@ function App() {
         categories={categories}
         activeCategory={activeCategory}
         onCategoryChange={(nextCategory) => {
-          setActiveProductId(null);
-          setActiveCategory(nextCategory);
+          navigate(encodeCategoryPath(nextCategory));
         }}
         onLogoClick={() => {
-          setActiveProductId(null);
           const allCategory =
             categories.find((c) => c.toLowerCase() === "all") ??
             categories[0] ??
             "all";
-          setActiveCategory(allCategory);
+          navigate(encodeCategoryPath(allCategory));
         }}
         cartItemCount={cartItemCount}
         onCartButtonClick={() => setIsCartOpen((prev) => !prev)}
       />
-      {activeProductId && pdpLoading ? (
-        <main className="flex min-h-[40vh] items-center justify-center font-raleway text-[#1D1F22]">
-          Loading product…
-        </main>
-      ) : activeProductId && activeProduct ? (
-        <SingleProduct
-          key={activeProductId}
-          product={activeProduct}
-          onBack={() => setActiveProductId(null)}
-          onAddToCart={(selections) => {
-            addProduct(activeProduct, selections);
-            setIsCartOpen(true);
-          }}
+
+      <Routes>
+        <Route
+          path="/"
+          element={
+            categories.length > 0 ? (
+              <Navigate to={encodeCategoryPath(categories[0])} replace />
+            ) : (
+              <main className="flex min-h-[40vh] items-center justify-center font-raleway text-[#1D1F22]">
+                Loading…
+              </main>
+            )
+          }
         />
-      ) : (
-        <GridPage
-          categoryName={activeCategory}
-          isLoading={isLoadingProducts}
-          errorMessage={loadError}
-          products={products}
-          onAddToCart={async (product) => {
-            try {
-              const fresh = await fetchProductById(product.id);
-              const p = fresh ?? product;
-              addProduct(p, getDefaultSelections(p));
-            } catch {
-              addProduct(product, getDefaultSelections(product));
-            }
-          }}
-          onOpenProduct={setActiveProductId}
+        <Route
+          path="/:category"
+          element={
+            <GridPage
+              categoryName={activeCategory}
+              isLoading={isLoadingProducts}
+              errorMessage={loadError}
+              products={products}
+              onAddToCart={async (product) => {
+                try {
+                  const fresh = await fetchProductById(product.id);
+                  const p = fresh ?? product;
+                  addProduct(p, getDefaultSelections(p));
+                } catch {
+                  addProduct(product, getDefaultSelections(product));
+                }
+              }}
+            />
+          }
         />
-      )}
+        <Route
+          path="/product/:productId"
+          element={
+            pdpLoading ? (
+              <main className="flex min-h-[40vh] items-center justify-center font-raleway text-[#1D1F22]">
+                Loading product…
+              </main>
+            ) : activeProduct ? (
+              <SingleProduct
+                key={activeProduct.id}
+                product={activeProduct}
+                onBack={() => navigate(from)}
+                onAddToCart={(selections) => {
+                  addProduct(activeProduct, selections);
+                  setIsCartOpen(true);
+                }}
+              />
+            ) : (
+              <main className="flex min-h-[40vh] items-center justify-center font-raleway text-[#1D1F22]">
+                Product not found.
+              </main>
+            )
+          }
+        />
+        <Route
+          path="*"
+          element={
+            categories.length > 0 ? (
+              <Navigate to={encodeCategoryPath(categories[0])} replace />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+      </Routes>
+
       <CartOverlay
         isOpen={isCartOpen}
         lines={lines}
@@ -245,6 +330,16 @@ function App() {
         }}
       />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/*" element={<RoutedApp />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

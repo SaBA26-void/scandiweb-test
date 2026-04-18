@@ -1,5 +1,6 @@
 import logo from "../../assets/logo/a-logo.svg";
 import cartIcon from "../../assets/icons/Empty Cart.svg";
+import { Link } from "react-router";
 
 type NavbarProps = {
   categories: string[];
@@ -29,22 +30,28 @@ const Navbar = ({
             <li
               key={category}
               data-testid={
-                activeCategory === category ? "active-category-link" : "category-link"
+                activeCategory === category
+                  ? "active-category-link"
+                  : "category-link"
               }
-              onClick={() => onCategoryChange(category)}
               className={`cursor-pointer text-center items-end pb-[32px] ${
                 activeCategory === category
                   ? "text-[#5ECE7B] font-semibold border-b-2 border-[#5ECE7B]"
                   : "text-[#1D1F22] font-normal"
               }`}
             >
-              {category}
+              <Link
+                to={`/${encodeURIComponent(category)}`}
+                onClick={() => onCategoryChange(category)}
+              >
+                {category}
+              </Link>
             </li>
           ))}
         </ul>
 
-        <button
-          type="button"
+        <Link
+          to="/"
           onClick={onLogoClick}
           className="block border-0 bg-transparent p-0"
           aria-label="Go to all products"
@@ -54,7 +61,7 @@ const Navbar = ({
             alt="Brand logo"
             className="h-[41px] w-[41px] cursor-pointer"
           />
-        </button>
+        </Link>
 
         <button
           type="button"
