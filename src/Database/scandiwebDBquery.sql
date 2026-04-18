@@ -88,3 +88,24 @@ CREATE TABLE IF NOT EXISTS product_attribute_values (
         REFERENCES attribute_items (attribute_item_id)
         ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS orders (
+    order_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS order_items (
+    order_item_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    order_id INT UNSIGNED NOT NULL,
+    product_id VARCHAR(100) NOT NULL,
+    quantity INT UNSIGNED NOT NULL,
+    selected_attributes_json TEXT NOT NULL,
+    INDEX idx_order_items_order (order_id),
+    INDEX idx_order_items_product (product_id),
+    CONSTRAINT fk_order_items_order FOREIGN KEY (order_id)
+        REFERENCES orders (order_id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_order_items_product FOREIGN KEY (product_id)
+        REFERENCES products (product_id)
+        ON DELETE RESTRICT ON UPDATE CASCADE
+);

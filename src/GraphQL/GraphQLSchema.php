@@ -7,6 +7,7 @@ use App\GraphQL\Types\AttributeSetType;
 use App\GraphQL\Types\CategoryType;
 use App\GraphQL\Types\CurrencyType;
 use App\GraphQL\Types\GalleryImageType;
+use App\GraphQL\Types\MutationType;
 use App\GraphQL\Types\PriceType;
 use App\GraphQL\Types\ProductType;
 use App\GraphQL\Types\QueryType;
@@ -24,7 +25,11 @@ final class GraphQLSchema
         $productType = ProductType::create($galleryType, $priceType, $attributeSetType);
         $categoryType = CategoryType::create($productType);
         $queryType = QueryType::create($categoryType, $productType);
+        $mutationType = MutationType::create();
 
-        return new Schema(['query' => $queryType]);
+        return new Schema([
+            'query' => $queryType,
+            'mutation' => $mutationType,
+        ]);
     }
 }
