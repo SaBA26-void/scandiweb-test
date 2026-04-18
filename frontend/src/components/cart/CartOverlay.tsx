@@ -38,6 +38,7 @@ const CartOverlay = ({
         onClick={onClose}
       />
       <aside
+        data-testid="cart-overlay"
         className="fixed z-50 flex max-w-[325px] w-[100%] flex-col bg-white shadow-[-4px_0_24px_rgba(0,0,0,0.08)]"
         style={{
           right: "72px",
