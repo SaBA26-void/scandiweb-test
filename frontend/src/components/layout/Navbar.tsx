@@ -29,11 +29,6 @@ const Navbar = ({
           {categories.map((category) => (
             <li
               key={category}
-              data-testid={
-                activeCategory === category
-                  ? "active-category-link"
-                  : "category-link"
-              }
               className={`cursor-pointer text-center items-end pb-[32px] ${
                 activeCategory === category
                   ? "text-[#5ECE7B] font-semibold border-b-2 border-[#5ECE7B]"
@@ -43,6 +38,11 @@ const Navbar = ({
               <Link
                 to={`/${encodeURIComponent(category)}`}
                 onClick={() => onCategoryChange(category)}
+                data-testid={
+                  activeCategory === category
+                    ? "active-category-link"
+                    : "category-link"
+                }
               >
                 {category}
               </Link>
