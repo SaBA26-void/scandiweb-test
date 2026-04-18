@@ -17,6 +17,10 @@ function toKebabCase(value: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
+function toAttributeOptionToken(value: string): string {
+  return value.trim().replace(/\s+/g, "-");
+}
+
 type AttributeSectionProps =
   | {
       title: string;
@@ -49,11 +53,7 @@ export default function AttributeSection(props: AttributeSectionProps) {
             <li key={option.id}>
               <button
                 type="button"
-                data-testid={
-                  attributeKebab === "color"
-                    ? `product-attribute-color-${option.value}`
-                    : undefined
-                }
+                data-testid={`product-attribute-${attributeKebab}-${toAttributeOptionToken(option.value)}`}
                 onClick={() => props.onSelect(option.id)}
                 aria-label={option.label}
                 className={`flex h-[36px] w-[36px] items-center justify-center border-2 transition-all ${
@@ -82,6 +82,7 @@ export default function AttributeSection(props: AttributeSectionProps) {
           <li key={option.id}>
             <button
               type="button"
+              data-testid={`product-attribute-${toKebabCase(props.title)}-${toAttributeOptionToken(option.label)}`}
               onClick={() => props.onSelect(option.id)}
               className={`flex items-center justify-center border px-[21px] py-[13px] text-[16px] font-source-sans-pro transition-colors ${
                 props.selectedId === option.id
