@@ -9,6 +9,14 @@ type SwatchOption = {
   value: string;
 };
 
+function toKebabCase(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 type AttributeSectionProps =
   | {
       title: string;
@@ -32,6 +40,7 @@ const legendClassName =
 
 export default function AttributeSection(props: AttributeSectionProps) {
   if (props.type === "swatch") {
+    const attributeKebab = toKebabCase(props.title);
     return (
       <fieldset className="mb-[27px]" data-testid={props.dataTestId}>
         <legend className={legendClassName}>{props.title}:</legend>
@@ -40,6 +49,11 @@ export default function AttributeSection(props: AttributeSectionProps) {
             <li key={option.id}>
               <button
                 type="button"
+                data-testid={
+                  attributeKebab === "color"
+                    ? `product-attribute-color-${option.value}`
+                    : undefined
+                }
                 onClick={() => props.onSelect(option.id)}
                 aria-label={option.label}
                 className={`flex h-[36px] w-[36px] items-center justify-center border-2 transition-all ${
