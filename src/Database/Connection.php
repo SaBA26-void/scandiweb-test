@@ -13,10 +13,11 @@ class Connection
 
     private function __construct()
     {
-        $host = 'localhost';
-        $user = 'root';
-        $password = '';
-        $databaseName = 'scandiweb';
+        $env = parse_ini_file(__DIR__ . '/.env');
+        $host = $env['DB_HOST'];
+        $user = $env['DB_USER'];
+        $password = $env['DB_PASSWORD'];
+        $databaseName = $env['DB_NAME'];
         $dsn = "mysql:host=$host;dbname=$databaseName;charset=utf8";
         try {
             $this->connection = new PDO($dsn, $user, $password);
